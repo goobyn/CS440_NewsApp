@@ -32,7 +32,7 @@ export class SettingsPage implements OnInit {
     }
 
     try {
-      const response = await axios.get(`http://localhost:5000/user/${userEmail}`);
+      const response = await axios.get(`http://142.11.252.37:5000/user/${userEmail}`);
       const user = response.data;
       this.firstName = user.firstName;
       this.lastName = user.lastName;
@@ -66,7 +66,7 @@ export class SettingsPage implements OnInit {
       const interests = Object.keys(this.selectedInterests).filter(interest => this.selectedInterests[interest]);
       const userEmail = localStorage.getItem('userEmail');  // Assuming userEmail is saved in localStorage
 
-      const response = await axios.put(`http://localhost:5000/user/${userEmail}`, {
+      const response = await axios.put(`http://142.11.252.37:5000/user/${userEmail}`, {
         firstName: this.firstName,
         lastName: this.lastName,
         email: this.email,

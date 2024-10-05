@@ -52,7 +52,7 @@ export class NewsfeedPage implements OnInit {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5000/newsfeed/${userEmail}`);
+      const response = await axios.get(`http://142.11.252.37:5000/newsfeed/${userEmail}`);
       this.articles = response.data.articles;
     } catch (error) {
       console.error('Error fetching articles:', error);

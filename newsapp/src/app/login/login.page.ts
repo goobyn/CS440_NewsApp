@@ -37,7 +37,7 @@ export class LoginPage {
 
     try {
       // Check the credentials against the database
-      const response = await axios.post('http://localhost:5000/login', {
+      const response = await axios.post('http://142.11.252.37:5000/login', {
         email: this.email,
         password: this.password
       });

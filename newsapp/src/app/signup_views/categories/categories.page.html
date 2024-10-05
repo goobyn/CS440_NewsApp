@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Choose Your Interests</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="onNext()">
+    <ion-list>
+      <ion-item *ngFor="let category of categories" lines="none" (click)="onCategoryClick(category, checkbox)">
+        <ion-label class="category-label">
+          {{ category }}
+        </ion-label>
+        <ion-checkbox #checkbox slot="start" (ionChange)="onCategoryChange(category, $event)"></ion-checkbox>
+      </ion-item>
+    </ion-list>
+
+    <!-- NEXT Button -->
+    <ion-button expand="full" type="submit">NEXT</ion-button>
+  </form>
+</ion-content>

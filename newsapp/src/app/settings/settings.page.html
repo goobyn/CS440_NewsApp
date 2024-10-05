@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Name Fields -->
+  <ion-item>
+    <ion-label position="floating">First Name</ion-label>
+    <ion-input [(ngModel)]="firstName" type="text"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Last Name</ion-label>
+    <ion-input [(ngModel)]="lastName" type="text"></ion-input>
+  </ion-item>
+
+  <!-- Email Field -->
+  <ion-item>
+    <ion-label position="floating">Email</ion-label>
+    <ion-input [(ngModel)]="email" type="email"></ion-input>
+  </ion-item>
+
+  <!-- Password Fields -->
+  <ion-item>
+    <ion-label position="floating">New Password</ion-label>
+    <ion-input [(ngModel)]="password" type="password"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Confirm Password</ion-label>
+    <ion-input [(ngModel)]="confirmPassword" type="password"></ion-input>
+  </ion-item>
+
+  <!-- Interests Header -->
+  <h3 class="ion-padding-top">Your Interests</h3>
+
+  <!-- Interest Selection -->
+  <ion-list>
+    <ion-item *ngFor="let interest of categories">
+      <ion-label>{{ interest }}</ion-label>
+      <ion-checkbox slot="start" [(ngModel)]="selectedInterests[interest]"></ion-checkbox>
+    </ion-item>
+  </ion-list>
+
+  <!-- Save Button -->
+  <ion-button expand="full" (click)="saveSettings()">Save</ion-button>
+
+  <!-- Log Out Button -->
+  <ion-button expand="full" color="danger" (click)="logout()">Log Out</ion-button>
+
+</ion-content>

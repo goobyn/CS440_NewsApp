@@ -1,0 +1,38 @@
+ion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100px;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f900;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent; /* Remove weird highlighting */
+    cursor: pointer;  /* Make it look clickable */
+  }
+  
+  /* Hover/active effect: slightly enlarge and show blue background */
+  ion-item:active, ion-item.activated {
+    background-color: rgba(0, 123, 255, 0.1);  /* Light blue background */
+    transform: scale(1.03);  /* Slightly enlarge the item */
+  }
+  
+  .category-label {
+    font-size: 1.5rem;
+    flex-grow: 1;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  ion-checkbox {
+    --background: #28a745; /* Green background */
+    --border-color: #28a745; /* Green border */
+    --color-checked: #28a745; /* Green checkmark */
+    --checkmark-color: white; /* White checkmark when checked */
+  }
+  

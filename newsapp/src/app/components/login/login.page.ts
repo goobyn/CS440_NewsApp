@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import axios from 'axios';
-import { SignupService } from '../signup/signup.service'; // To store logged-in user info
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +16,7 @@ export class LoginPage {
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private signupService: SignupService  // For user session management
+    private userService: UserService  // Use UserService instead of SignupService
   ) {}
 
   async presentAlert(message: string) {
@@ -36,17 +35,10 @@ export class LoginPage {
     }
 
     try {
-      // Check the credentials against the database
-      const response = await axios.post('http://142.11.252.37:5000/login', {
-        email: this.email,
-        password: this.password
-      });
+      // Use UserService to handle login
+      const loginSuccess = await this.userService.login(this.email, this.password);
 
-      if (response.data.success) {
-        localStorage.setItem('userEmail', this.email);  // Save the user's email in localStorage
-        // Store user details in the SignupService for session management
-        this.signupService.setUserDetails(response.data.user);
-
+      if (loginSuccess) {
         // Navigate to the main page (e.g., newsfeed) after successful login
         this.router.navigateByUrl('/tabs/newsfeed');
       } else {

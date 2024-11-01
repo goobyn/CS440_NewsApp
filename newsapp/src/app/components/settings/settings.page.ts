@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import axios from 'axios';
+import { SignupService } from '../signup/signup.service';
 
 @Component({
   selector: 'app-settings',
@@ -18,7 +19,7 @@ export class SettingsPage implements OnInit {
   categories = ['Business', 'Entertainment', 'General', 'Health', 'Science', 'Sports', 'Technology'];
   selectedInterests: { [key: string]: boolean } = {};  // Index signature for string keys and boolean values
 
-  constructor(private alertController: AlertController, private router: Router) {}
+  constructor(private alertController: AlertController, private router: Router, private signupService: SignupService) {}
 
   async ngOnInit() {
     await this.loadUserData();
@@ -32,7 +33,7 @@ export class SettingsPage implements OnInit {
     }
 
     try {
-      const response = await axios.get(`http://142.11.252.37:5000/user/${userEmail}`);
+      const response = await axios.get(`http://localhost:5000/user/${userEmail}`);
       const user = response.data;
       this.firstName = user.firstName;
       this.lastName = user.lastName;
@@ -66,7 +67,7 @@ export class SettingsPage implements OnInit {
       const interests = Object.keys(this.selectedInterests).filter(interest => this.selectedInterests[interest]);
       const userEmail = localStorage.getItem('userEmail');  // Assuming userEmail is saved in localStorage
 
-      const response = await axios.put(`http://142.11.252.37:5000/user/${userEmail}`, {
+      const response = await axios.put(`http://localhost:5000/user/${userEmail}`, {
         firstName: this.firstName,
         lastName: this.lastName,
         email: this.email,
@@ -92,8 +93,25 @@ export class SettingsPage implements OnInit {
     checkbox.checked = !checkbox.checked;
   }
 
-  logout() {
-    localStorage.removeItem('userEmail');  // Clear session data
-    this.router.navigateByUrl('/login');
+  // Helper method to reset user-related state in the component
+  clearUserData() {
+    this.firstName = '';
+    this.lastName = '';
+    this.email = '';
+    this.password = '';
+    this.confirmPassword = '';
+    this.selectedInterests = {};
   }
-}  
+
+  logout() {
+    localStorage.clear();
+    this.signupService.resetUserData();
+    this.clearUserData();  // Reset component data to clear previous user info
+
+    // Navigate to login page and refresh state
+    this.router.navigateByUrl('/login').then(() => {
+      window.location.reload();
+    });
+  }
+}
+

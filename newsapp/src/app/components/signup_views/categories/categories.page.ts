@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { SignupService } from '../../signup/signup.service';  // Import the SignupService
+import { SignupService, UserDetails } from 'src/app/services/signup.service';  // Import the SignupService
 import axios from 'axios';  // Import axios for HTTP requests
 
 @Component({
@@ -9,11 +9,13 @@ import axios from 'axios';  // Import axios for HTTP requests
   styleUrls: ['./categories.page.scss'],
 })
 export class CategoriesPage {
-
   categories = ['Business', 'Entertainment', 'General', 'Health', 'Science', 'Sports', 'Technology'];
   selectedCategories: string[] = [];
+  userDetails;
 
-  constructor(private signupService: SignupService, private router: Router) {}
+  constructor(private signupService: SignupService, private router: Router) {
+    this.userDetails = this.signupService.getUserDetails(); // Ensure this method returns user details
+  }
 
   onCategoryChange(category: string, event: any) {
     if (event.detail.checked) {
@@ -31,7 +33,6 @@ export class CategoriesPage {
 
   async onNext() {
     // Get user details from the SignupService
-    const userDetails = this.signupService.getUserDetails();
     const interests = this.selectedCategories;
 
     if (interests.length === 0) {
@@ -40,18 +41,19 @@ export class CategoriesPage {
     }
 
     try {
-      // Send the complete user information including interests to the backend
-      const response = await axios.post('http://142.11.252.37:5000/signup', {
-        firstName: userDetails.firstName,
-        lastName: userDetails.lastName,
-        email: userDetails.email,
-        password: userDetails.password,
-        interests: interests  // Send the selected categories as interests
-      });
-      console.log(response.data);
-
-      // Navigate to the newsfeed or another appropriate page
-      this.router.navigateByUrl('/tabs/newsfeed');
+      if (this.userDetails) {
+        const response = await axios.post('http://localhost:5000/signup', {
+          firstName: this.userDetails.firstName,
+          lastName: this.userDetails.lastName,
+          email: this.userDetails.email,
+          password: this.userDetails.password,
+          interests: interests
+        });
+        console.log(response.data);
+        this.router.navigateByUrl('/tabs/newsfeed');
+      } else {
+        console.error('User details are not available.');
+      }      
     } catch (error: any) {
       console.error('Error during signup:', error);
     }

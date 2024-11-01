@@ -69,7 +69,7 @@ export class SignupPage {
       email: this.email,
       password: this.password,
     });
-
+    localStorage.setItem('userEmail', this.email);  // Save the user's email in localStorage
     // Navigate to the "choose-categories" page for interests selection
     this.router.navigateByUrl('/signup/choose-categories');
   }

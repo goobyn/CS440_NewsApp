@@ -14,4 +14,8 @@ export class SignupService {
   getUserDetails() {
     return this.userDetails;
   }
+
+  resetUserData() {
+    this.userDetails = null;  // Or set to initial state
+  }
 }

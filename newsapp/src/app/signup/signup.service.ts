@@ -4,7 +4,6 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class SignupService {
-
   private userDetails: any = {};
 
   setUserDetails(details: any) {

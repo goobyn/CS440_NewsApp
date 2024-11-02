@@ -1,7 +1,9 @@
+// src/app/signup/signup.page.ts
 import { Component } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { SignupService } from '../signup/signup.service';  // Import the SignupService
+import { EventBusService } from '../services/event-bus.service';  // Use EventBusService instead of SignupService
+import { SignupService } from './signup.service';  // Import SignupService
 
 @Component({
   selector: 'app-signup',
@@ -9,7 +11,6 @@ import { SignupService } from '../signup/signup.service';  // Import the SignupS
   styleUrls: ['./signup.page.scss'],
 })
 export class SignupPage {
-
   firstName = '';
   lastName = '';
   email = '';
@@ -19,7 +20,8 @@ export class SignupPage {
   constructor(
     private alertController: AlertController,
     private router: Router,
-    private signupService: SignupService  // Inject the SignupService
+    private eventBus: EventBusService,
+    private signupService: SignupService 
   ) {}
 
   async presentAlert(message: string) {
@@ -32,7 +34,6 @@ export class SignupPage {
   }
 
   async onSignup() {
-    // Validation for first name, last name, email, and password
     const nameRegex = /^[A-Za-z]{2,}$/;
     if (!nameRegex.test(this.firstName)) {
       this.presentAlert('Invalid First Name: Must be more than 1 letter and contain no numbers or symbols.');
@@ -50,7 +51,6 @@ export class SignupPage {
       return;
     }
 
-    // Password validation (minimum 6 characters, 1 uppercase, 1 lowercase, 1 number)
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
     if (!passwordRegex.test(this.password)) {
       this.presentAlert('Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.');
@@ -61,8 +61,6 @@ export class SignupPage {
       this.presentAlert('Passwords do not match. Please confirm your password.');
       return;
     }
-
-    // Save user details to the SignupService to pass to the next page
     this.signupService.setUserDetails({
       firstName: this.firstName,
       lastName: this.lastName,
@@ -70,7 +68,16 @@ export class SignupPage {
       password: this.password,
     });
 
-    // Navigate to the "choose-categories" page for interests selection
+    this.eventBus.emit({
+      name: 'userSignup',
+      data: {
+        firstName: this.firstName,
+        lastName: this.lastName,
+        email: this.email,
+        password: this.password,
+      }
+    });
+
     this.router.navigateByUrl('/signup/choose-categories');
   }
 }

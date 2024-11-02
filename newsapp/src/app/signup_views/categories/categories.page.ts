@@ -32,13 +32,19 @@ export class CategoriesPage {
   async onNext() {
     // Get user details from the SignupService
     const userDetails = this.signupService.getUserDetails();
+    console.log('User Details:', userDetails);  // Debugging: log user details
     const interests = this.selectedCategories;
-
+  
     if (interests.length === 0) {
       alert("Please select at least one category.");
       return;
     }
-
+  
+    if (!userDetails || !userDetails.firstName || !userDetails.lastName || !userDetails.email || !userDetails.password) {
+      alert("User details are incomplete. Please check the information entered.");
+      return;
+    }
+  
     try {
       // Send the complete user information including interests to the backend
       const response = await axios.post('http://localhost:5000/signup', {
@@ -48,16 +54,18 @@ export class CategoriesPage {
         password: userDetails.password,
         interests: interests  // Send the selected categories as interests
       });
-
+  
       localStorage.setItem('userEmail', userDetails.email);  // Save the user's email in localStorage
       console.log(response.data);
-
+  
       // Navigate to the newsfeed or another appropriate page
       this.router.navigateByUrl('/tabs/newsfeed').then(() => {
         window.location.reload();
       });
     } catch (error: any) {
       console.error('Error during signup:', error);
+      alert(`Error during signup: ${error.response ? error.response.data.msg : 'Unknown error'}`);
     }
   }
+  
 }

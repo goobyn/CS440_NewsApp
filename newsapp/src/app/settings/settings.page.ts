@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import axios from 'axios';
+import { EventBusService } from '../services/event-bus.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
 })
-export class SettingsPage implements OnInit {
-
+export class SettingsPage implements OnInit, OnDestroy {
   firstName = '';
   lastName = '';
   email = '';
@@ -17,34 +17,61 @@ export class SettingsPage implements OnInit {
   confirmPassword = '';
   categories = ['Business', 'Entertainment', 'General', 'Health', 'Science', 'Sports', 'Technology'];
   selectedInterests: { [key: string]: boolean } = {};  // Index signature for string keys and boolean values
+  private eventSubscription: Subscription = new Subscription();  // Manage subscriptions
 
-  constructor(private alertController: AlertController, private router: Router) {}
+  constructor(
+    private alertController: AlertController,
+    private router: Router,
+    private eventBusService: EventBusService
+  ) {}
 
-  async ngOnInit() {
-    await this.loadUserData();
-  }
-
-  async loadUserData() {
-    const userEmail = localStorage.getItem('userEmail');  // Assuming user's email is saved in localStorage
+  ngOnInit() {
+    const userEmail = localStorage.getItem('userEmail');
     if (!userEmail) {
       this.router.navigateByUrl('/login');
       return;
     }
 
-    try {
-      const response = await axios.get(`http://localhost:5000/user/${userEmail}`);
-      const user = response.data;
-      this.firstName = user.firstName;
-      this.lastName = user.lastName;
-      this.email = user.email;
+    // Emit event to load user data
+    this.eventBusService.emit({ name: 'loadUserData', data: { email: userEmail } });
 
-      // Prefill the interests based on user's current interests
-      this.categories.forEach(category => {
-        this.selectedInterests[category] = user.interests.includes(category);
-      });
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    }
+    // Listen for user data loaded event
+    this.eventSubscription.add(
+      this.eventBusService.on('userDataLoaded').subscribe((user: any) => {
+        this.firstName = user.firstName;
+        this.lastName = user.lastName;
+        this.email = user.email;
+
+        // Populate selected interests
+        this.categories.forEach(category => {
+          this.selectedInterests[category] = user.interests.includes(category);
+        });
+      })
+    );
+
+    // Listen for errors in loading user data
+    this.eventSubscription.add(
+      this.eventBusService.on('userDataLoadError').subscribe((error: any) => {
+        console.error('Error loading user data:', error);
+        this.presentAlert('Failed to load user data. Please try again.');
+      })
+    );
+
+    // Listen for settings save success and error events
+    this.eventSubscription.add(
+      this.eventBusService.on('settingsSaveSuccess').subscribe(() => {
+        this.router.navigateByUrl('/tabs/newsfeed').then(() => {
+          window.location.reload();  // Force the entire page to reload
+        });
+      })
+    );
+
+    this.eventSubscription.add(
+      this.eventBusService.on('settingsSaveError').subscribe((error: any) => {
+        console.error('Error saving user data:', error);
+        this.presentAlert('Failed to save settings. Please try again.');
+      })
+    );
   }
 
   async presentAlert(message: string) {
@@ -56,44 +83,34 @@ export class SettingsPage implements OnInit {
     await alert.present();
   }
 
-  async saveSettings() {
+  saveSettings() {
     if (this.password && this.password !== this.confirmPassword) {
       this.presentAlert('Passwords do not match.');
       return;
     }
 
-    try {
-      const interests = Object.keys(this.selectedInterests).filter(interest => this.selectedInterests[interest]);
-      const userEmail = localStorage.getItem('userEmail');  // Assuming userEmail is saved in localStorage
+    const interests = Object.keys(this.selectedInterests).filter(interest => this.selectedInterests[interest]);
+    const userEmail = localStorage.getItem('userEmail');
 
-      const response = await axios.put(`http://localhost:5000/user/${userEmail}`, {
+    // Emit event to save settings
+    this.eventBusService.emit({
+      name: 'saveSettings',
+      data: {
+        email: userEmail,
         firstName: this.firstName,
         lastName: this.lastName,
-        email: this.email,
-        password: this.password,  // Send the new password if provided
+        password: this.password,
         interests
-      });
-
-      if (response.data.msg === 'Email already exists') {
-        this.presentAlert('The email is already taken.');
-      } else {
-        localStorage.setItem('userEmail', this.email);  // Update email in localStorage
-        this.router.navigateByUrl('/tabs/newsfeed').then(() => {
-          window.location.reload();  // Force the entire page to reload
-        });
       }
-    } catch (error) {
-      console.error('Error saving user data:', error);
-    }
+    });
   }
-  
-  // Toggle category selection when clicking the whole ion-item
-  onCategoryClick(category: string, checkbox: any) {
-    checkbox.checked = !checkbox.checked;
+
+  ngOnDestroy() {
+    this.eventSubscription.unsubscribe();  // Clean up subscriptions
   }
 
   logout() {
-    localStorage.removeItem('userEmail');  // Clear session data
+    localStorage.removeItem('userEmail');
     this.router.navigateByUrl('/login');
   }
-}  
+}

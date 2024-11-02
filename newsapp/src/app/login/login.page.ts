@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import axios from 'axios';
-import { SignupService } from '../signup/signup.service'; // To store logged-in user info
+import { EventBusService } from '../services/event-bus.service';
 
 @Component({
   selector: 'app-login',
@@ -10,14 +10,13 @@ import { SignupService } from '../signup/signup.service'; // To store logged-in 
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage {
-
   email = '';
   password = '';
 
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private signupService: SignupService  // For user session management
+    private eventBus: EventBusService,
   ) {}
 
   async presentAlert(message: string) {
@@ -34,21 +33,20 @@ export class LoginPage {
       this.presentAlert('Please enter your email and password.');
       return;
     }
-
+  
     try {
-      // Check the credentials against the database
       const response = await axios.post('http://localhost:5000/login', {
         email: this.email,
         password: this.password
       });
-
+  
       if (response.data.success) {
-        localStorage.setItem('userEmail', this.email);  // Save the user's email in localStorage
-        // Store user details in the SignupService for session management
-        this.signupService.setUserDetails(response.data.user);
-
-        // Navigate to the main page (e.g., newsfeed) after successful login
+        localStorage.setItem('userEmail', this.email);
+        // Emit a login success event
         this.router.navigateByUrl('/tabs/newsfeed').then(() => {
+          this.eventBus.emit({ name: 'userLoggedIn', data: response.data.user });
+          this.eventBus.emit({ name: 'fetchArticles', data: { email: this.email } });
+          console.log('Emitting fetchArticles event');
           window.location.reload();
         });
       } else {
@@ -58,7 +56,7 @@ export class LoginPage {
       console.error('Login error:', error);
       this.presentAlert('Login failed. Please try again.');
     }
-  }
+  }  
 
   // Navigate to the signup page
   goToSignup() {

@@ -1,7 +1,8 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
+const eventBus = require('../events/eventBus');  // Import the event bus
 
-// Register a new user
+// Register a new user and emit an event
 const registerUser = async (req, res) => {
   const { firstName, lastName, email, password, interests } = req.body;
 
@@ -26,6 +27,9 @@ const registerUser = async (req, res) => {
     });
 
     await user.save();
+
+    // Emit an event for user registration
+    eventBus.emit('userRegistered', user);
     res.status(201).json({ msg: 'User created successfully', user });
   } catch (error) {
     console.error('Error in registerUser:', error);
@@ -48,28 +52,29 @@ const getUser = async (req, res) => {
   }
 };
 
-// Login a user
+// Login a user and emit an event
 const loginUser = async (req, res) => {
-    const { email, password } = req.body;
-  
-    if (!email || !password) {
-      return res.status(400).json({ msg: 'Email and password are required' });
-    }
-  
-    try {
-      const user = await User.findOne({ email });
-      if (!user) return res.status(400).json({ msg: 'User not found' });
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
-  
-      res.status(200).json({ success: true, msg: 'Login successful', user });
-    } catch (error) {
-      console.error('Error in loginUser:', error);
-      res.status(500).json({ msg: 'Server error', error: error.message });
-    }
-  };
-  
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ msg: 'Email and password are required' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: 'User not found' });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
+
+    // Emit an event for user login
+    eventBus.emit('userLoggedIn', user);
+    res.status(200).json({ success: true, msg: 'Login successful', user });
+  } catch (error) {
+    console.error('Error in loginUser:', error);
+    res.status(500).json({ msg: 'Server error', error: error.message });
+  }
+};
 
 // Update user information
 const updateUser = async (req, res) => {
@@ -99,6 +104,9 @@ const updateUser = async (req, res) => {
     }
 
     await user.save();
+
+    // Emit an event for user update
+    eventBus.emit('userUpdated', user);
     res.status(200).json({ msg: 'User updated successfully', user });
   } catch (error) {
     console.error('Error in updateUser:', error);
@@ -106,5 +114,4 @@ const updateUser = async (req, res) => {
   }
 };
 
-// Export the controller functions
 module.exports = { registerUser, loginUser, updateUser, getUser };

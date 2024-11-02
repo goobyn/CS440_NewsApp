@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { UserService } from './services/user.service';
 
 @Component({
   selector: 'app-root',
@@ -8,21 +9,9 @@ import { Router } from '@angular/router';
 })
 export class AppComponent implements OnInit {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private userService: UserService) {}
 
   ngOnInit() {
-    this.checkSession();
   }
 
-  checkSession() {
-    const userEmail = localStorage.getItem('userEmail');  // Check if user's email is saved in localStorage
-
-    if (userEmail) {
-      // If the user is logged in, navigate to the newsfeed
-      this.router.navigateByUrl('/tabs/newsfeed');
-    } else {
-      // Otherwise, navigate to the login page
-      this.router.navigateByUrl('/login');
-    }
-  }
 }

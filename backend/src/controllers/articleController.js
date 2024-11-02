@@ -1,5 +1,6 @@
 const axios = require('axios');
-const User = require('../models/userModel');  // Import User model to interact with the database
+const User = require('../models/userModel');
+const eventBus = require('../events/eventBus');  // Import the event bus
 
 const NEWS_API_KEY = '8b6ee44ff37e4e8db1490e37cb418075';
 
@@ -19,7 +20,7 @@ const getArticlesByCategory = async (category) => {
   }
 };
 
-// Controller function to get newsfeed for a user
+// Controller function to get newsfeed for a user and emit an event
 const getNewsfeed = async (req, res) => {
   const { email } = req.params;
 
@@ -35,7 +36,8 @@ const getNewsfeed = async (req, res) => {
       user.interests.map(interest => getArticlesByCategory(interest))
     );
 
-    // Send flattened array of articles as the response
+    // Emit an event for articles fetched
+    eventBus.emit('articlesFetched', articles.flat());
     res.json({ articles: articles.flat() });
   } catch (error) {
     console.error('Error fetching newsfeed:', error);
@@ -43,5 +45,4 @@ const getNewsfeed = async (req, res) => {
   }
 };
 
-// Export the controller functions
 module.exports = { getNewsfeed, getArticlesByCategory };

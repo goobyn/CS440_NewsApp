@@ -41,17 +41,21 @@ export class CategoriesPage {
 
     try {
       // Send the complete user information including interests to the backend
-      const response = await axios.post('http://142.11.252.37:5000/signup', {
+      const response = await axios.post('http://localhost:5000/signup', {
         firstName: userDetails.firstName,
         lastName: userDetails.lastName,
         email: userDetails.email,
         password: userDetails.password,
         interests: interests  // Send the selected categories as interests
       });
+
+      localStorage.setItem('userEmail', userDetails.email);  // Save the user's email in localStorage
       console.log(response.data);
 
       // Navigate to the newsfeed or another appropriate page
-      this.router.navigateByUrl('/tabs/newsfeed');
+      this.router.navigateByUrl('/tabs/newsfeed').then(() => {
+        window.location.reload();
+      });
     } catch (error: any) {
       console.error('Error during signup:', error);
     }

@@ -39,9 +39,9 @@ This will:
 2. Start the containers for the User Service, Interest Service, Newsfeed Service, API Gateway, and MongoDB.
 
 ### Step 3: Run the Ionic Frontend
-Navigate to the `frontend` directory and install dependencies:
+Navigate to the `newsapp` directory and install dependencies:
 ```bash
-cd frontend
+cd newsapp
 npm install
 ```
 
@@ -68,6 +68,6 @@ To stop the Ionic frontend server, press `Ctrl + C` in the terminal where it is 
 ---
 
 ## Notes
-- The `frontend` directory contains the Ionic application, and its dependencies are managed separately from the backend.
+- The `newsapp` directory contains the Ionic application, and its dependencies are managed separately from the backend.
 
 For any issues, feel free to email njg234@nau.edu or goobyn@gmail.com.

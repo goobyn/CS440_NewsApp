@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "4000:4000" # Expose the API Gateway on port 4000
+    networks:
+      - backend
+    depends_on:
+      - user-service
+      - newsfeed-service
+      - interest-service
+
+  user-service:
+    build:
+      context: ./user-service
+    ports:
+      - "3001:3001"
+    networks:
+      - backend
+    depends_on:
+      - mongo-user-service
+    environment:
+      - MONGO_URL=mongodb://mongo-user-service:27017/users
+
+  newsfeed-service:
+    build:
+      context: ./newsfeed-service
+    ports:
+      - "3002:3002"
+    networks:
+      - backend
+
+  interest-service:
+    build:
+      context: ./interest-service
+    ports:
+      - "3003:3003"
+    networks:
+      - backend
+
+  mongo-user-service:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - backend
+
+networks:
+  backend:

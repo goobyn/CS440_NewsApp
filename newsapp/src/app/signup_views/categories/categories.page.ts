@@ -40,19 +40,22 @@ export class CategoriesPage {
     }
 
     try {
-      // Send the complete user information including interests to the backend
-      const response = await axios.post('http://142.11.252.37:5000/signup', {
+      const response = await axios.post('http://localhost:4000/signup', {
         firstName: userDetails.firstName,
         lastName: userDetails.lastName,
         email: userDetails.email,
         password: userDetails.password,
-        interests: interests  // Send the selected categories as interests
+        interests: interests,
       });
-      console.log(response.data);
-
-      // Navigate to the newsfeed or another appropriate page
+    
+      if (response.data.user && response.data.user.email) {
+        localStorage.setItem('userEmail', response.data.user.email); // Save email to local storage
+        console.log('User email saved to local storage:', response.data.user.email);
+      }
+    
+      // Redirect or handle the next steps
       this.router.navigateByUrl('/tabs/newsfeed');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error during signup:', error);
     }
   }

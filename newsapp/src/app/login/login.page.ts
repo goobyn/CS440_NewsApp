@@ -37,13 +37,14 @@ export class LoginPage {
 
     try {
       // Check the credentials against the database
-      const response = await axios.post('http://142.11.252.37:5000/login', {
+      const response = await axios.post('http://localhost:4000/login', {
         email: this.email,
         password: this.password
       });
 
-      if (response.data.success) {
-        localStorage.setItem('userEmail', this.email);  // Save the user's email in localStorage
+      if (response.data.user && response.data.user.email) {
+        localStorage.setItem('userEmail', response.data.user.email); // Save email to local storage
+        console.log('User email saved to local storage:', response.data.user.email);
         // Store user details in the SignupService for session management
         this.signupService.setUserDetails(response.data.user);
 
